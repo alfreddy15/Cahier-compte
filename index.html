@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2F4F6F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Comptes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cahier de comptes</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:15px system-ui,sans-serif;color:#111;background:#f4f6f8;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+header{position:sticky;top:0;background:#fff;padding:8px;border-bottom:1px solid #ccd;z-index:2}
+#titre{width:100%;font:700 18px system-ui;border:0;padding:4px 2px;background:none}
+.tot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 8px}
+.tot label{font-weight:600}
+#total{width:8.5rem;text-align:right;font:700 16px system-ui;background:#fff8dc}
+#dep{color:#b3261e}#reste{color:#1f3a5f;font-size:17px}
+.neg{color:#b3261e!important}.bad{color:red!important}
+.cols,.row{display:grid;grid-template-columns:4.4rem 1fr 5.4rem 5.4rem}
+.cols span{background:#2f4f6f;color:#fff;font-weight:600;font-size:12px;padding:4px;border:1px solid #1d3347;text-align:center}
+main{padding:0 8px 8px;background:#fff}
+.row input,.row div{border:1px solid #889;margin:0 -1px -1px 0;padding:7px 4px;font:14px system-ui;min-width:0;border-radius:0;background:#fff}
+.row input:nth-child(3){text-align:right}
+.row div{text-align:right;background:#f3f3f3}
+input{font-size:14px}
+footer{display:flex;gap:6px;flex-wrap:wrap;padding:10px 8px calc(10px + env(safe-area-inset-bottom))}
+button{font:600 14px system-ui;padding:10px 12px;border:1px solid #2f4f6f;border-radius:8px;background:#fff;color:#2f4f6f}
+button.p{background:#2f4f6f;color:#fff}
+#print{display:none}
+@media print{body>*:not(#print){display:none!important}#print{display:block;padding:10px;background:#fff}
+#print table{width:100%;border-collapse:collapse;font-size:12px}
+#print td,#print th{border:1px solid #666;padding:4px}#print th{background:#2f4f6f;color:#fff}
+#print td.r{text-align:right}#print h1{font-size:20px;margin:0 0 6px}}
+</style>
+</head>
+<body>
+<header>
+  <input id="titre" value="Cahier de comptes" aria-label="Titre">
+  <div class="tot">
+    <label>Total remis (FCFA) <input id="total" inputmode="decimal" placeholder="0"></label>
+    <span>Dépensé : <b id="dep">0</b></span>
+    <span>Reste : <b id="reste">0 FCFA</b></span>
+  </div>
+  <div class="cols"><span>Date</span><span>Description</span><span>Montant</span><span>Reste</span></div>
+</header>
+<main id="grid"></main>
+<footer>
+  <button onclick="addRows(10)">+ 10 lignes</button>
+  <button onclick="sauvegarder()">Sauvegarder</button>
+  <button onclick="$('#file').click()">Restaurer</button>
+  <button onclick="nouveau()">Nouveau</button>
+  <button class="p" onclick="pdf()">Exporter en PDF</button>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+</footer>
+<section id="print"></section>
+<script>
+const $=s=>document.querySelector(s), KEY="cahier-comptes", rows=[];
+const num=t=>{t=t.replace(/\s/g,"").replace(",",".");if(!t)return 0;const n=Number(t);return isNaN(n)?null:n};
+const fmt=v=>{const[a,b]=Math.abs(v).toFixed(v%1?2:0).split(".");return(v<0?"-":"")+a.replace(/\B(?=(\d{3})+$)/g," ")+(b?","+b:"")};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>new Date().toLocaleDateString("fr-FR");
+
+function addRows(k){
+  for(let i=0;i<k;i++){
+    const el=document.createElement("div");el.className="row";
+    const d=document.createElement("input"),n=document.createElement("input"),m=document.createElement("input"),r=document.createElement("div");
+    d.placeholder="jj/mm/aaaa";n.placeholder="Description";m.inputMode="decimal";m.placeholder="0";
+    n.enterKeyHint=m.enterKeyHint="next";
+    m.addEventListener("blur",()=>{const v=num(m.value);if(m.value.trim()&&v!==null){m.value=fmt(v);if(!d.value.trim())d.value=today();calc()}});
+    [d,n,m].forEach(x=>x.addEventListener("input",calc));
+    el.append(d,n,m,r);$("#grid").append(el);rows.push({d,n,m,r});
+  }
+}
+function calc(){
+  const t=num($("#total").value);$("#total").classList.toggle("bad",t===null);
+  let reste=t||0,dep=0;
+  for(const r of rows){
+    const m=num(r.m.value);r.m.classList.toggle("bad",m===null);
+    if(m===null||!r.m.value.trim()){r.r.textContent="";continue}
+    dep+=m;reste-=m;r.r.textContent=fmt(reste);r.r.classList.toggle("neg",reste<0);
+  }
+  $("#dep").textContent=fmt(dep);$("#reste").textContent=fmt(reste)+" FCFA";$("#reste").classList.toggle("neg",reste<0);
+  save();
+}
+const data=()=>({titre:$("#titre").value,total:$("#total").value,
+  lignes:rows.map(r=>({d:r.d.value,n:r.n.value,m:r.m.value})).filter(l=>l.d.trim()||l.n.trim()||l.m.trim())});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data()))}catch(e){}}
+function load(o){
+  $("#grid").innerHTML="";rows.length=0;
+  $("#titre").value=o.titre||"Cahier de comptes";$("#total").value=o.total||"";
+  const L=o.lignes||[];addRows(Math.max(30,L.length+10));
+  L.forEach((l,i)=>{rows[i].d.value=l.d||"";rows[i].n.value=l.n||"";rows[i].m.value=l.m||""});
+  calc();
+}
+function sauvegarder(){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data())],{type:"application/json"}));
+  a.download="cahier-"+new Date().toISOString().slice(0,10)+".json";a.click();
+}
+$("#file").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{load(JSON.parse(rd.result))}catch(x){alert("Fichier invalide.")}};
+  rd.readAsText(f);e.target.value="";
+});
+function nouveau(){
+  if(confirm("Effacer tout le cahier et recommencer à zéro ?\n(Pense à sauvegarder ou exporter avant.)"))load({});
+}
+function pdf(){
+  const t=num($("#total").value);if(t===null){alert("Le total remis n'est pas valide.");return}
+  const L=data().lignes;if(!L.length){alert("Aucune dépense à exporter.");return}
+  let reste=t,dep=0,h="";
+  for(const[i,l]of L.entries()){
+    const m=num(l.m);if(m===null){alert("Montant invalide : "+l.m);return}
+    dep+=m;reste-=m;
+    h+=`<tr><td>${i+1}</td><td>${esc(l.d)}</td><td>${esc(l.n)}</td><td class="r">${fmt(m)}</td><td class="r">${fmt(reste)}</td></tr>`;
+  }
+  $("#print").innerHTML=`<h1>${esc($("#titre").value)}</h1><p>Édité le ${today()} — Total remis : <b>${fmt(t)} FCFA</b></p>
+  <table><tr><th>N°</th><th>Date</th><th>Description</th><th>Montant (FCFA)</th><th>Reste (FCFA)</th></tr>${h}</table>
+  <p style="text-align:right"><b>Total dépensé : ${fmt(dep)} FCFA<br>Argent restant : ${fmt(t-dep)} FCFA</b></p>`;
+  window.print();
+}
+let saved={};try{saved=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+load(saved);
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+</script>
+</body>
+</html>
