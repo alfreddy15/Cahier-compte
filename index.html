@@ -2,130 +2,122 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2F4F6F">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Comptes">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cahier de comptes</title>
 <style>
+:root{--bg:#f3f4f7;--card:#fff;--ink:#17202e;--mut:#5b6678;--line:#d5dae2;--hd:#1d2f4f;--hdt:#fff;--ok:#1d6b4a;--warn:#9a5600;--warnbg:#fff3e0;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#0f141c;--card:#18202c;--ink:#e8ecf2;--mut:#9aa6b8;--line:#2a3445;--hd:#27426e;--ok:#5fcf9e;--warn:#f0a84a;--warnbg:#2b2112;--bad:#ff8a80}}
 *{box-sizing:border-box}
-body{margin:0;font:15px system-ui,sans-serif;color:#111;background:#f4f6f8;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
-header{position:sticky;top:0;background:#fff;padding:8px;border-bottom:1px solid #ccd;z-index:2}
-#titre{width:100%;font:700 18px system-ui;border:0;padding:4px 2px;background:none}
-.tot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 8px}
-.tot label{font-weight:600}
-#total{width:8.5rem;text-align:right;font:700 16px system-ui;background:#fff8dc}
-#dep{color:#b3261e}#reste{color:#1f3a5f;font-size:17px}
-.neg{color:#b3261e!important}.bad{color:red!important}
-.cols,.row{display:grid;grid-template-columns:4.4rem 1fr 5.4rem 5.4rem}
-.cols span{background:#2f4f6f;color:#fff;font-weight:600;font-size:12px;padding:4px;border:1px solid #1d3347;text-align:center}
-main{padding:0 8px 8px;background:#fff}
-.row input,.row div{border:1px solid #889;margin:0 -1px -1px 0;padding:7px 4px;font:14px system-ui;min-width:0;border-radius:0;background:#fff}
-.row input:nth-child(3){text-align:right}
-.row div{text-align:right;background:#f3f3f3}
-input{font-size:14px}
-footer{display:flex;gap:6px;flex-wrap:wrap;padding:10px 8px calc(10px + env(safe-area-inset-bottom))}
-button{font:600 14px system-ui;padding:10px 12px;border:1px solid #2f4f6f;border-radius:8px;background:#fff;color:#2f4f6f}
-button.p{background:#2f4f6f;color:#fff}
-#print{display:none}
-@media print{body>*:not(#print){display:none!important}#print{display:block;padding:10px;background:#fff}
-#print table{width:100%;border-collapse:collapse;font-size:12px}
-#print td,#print th{border:1px solid #666;padding:4px}#print th{background:#2f4f6f;color:#fff}
-#print td.r{text-align:right}#print h1{font-size:20px;margin:0 0 6px}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px}
+.sub{color:var(--mut);margin:0 0 14px}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.box small{color:var(--mut);display:block}
+.box b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.box.main b{font-size:1.7rem;color:var(--ok)}
+form{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+label{font-size:.85rem;color:var(--mut);display:block}
+input,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+button{padding:10px 14px;border:0;border-radius:6px;background:var(--hd);color:var(--hdt);font:inherit;cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+#msg{margin-bottom:10px}
+.err{background:var(--warnbg);color:var(--warn);border-radius:6px;padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{background:var(--hd);color:var(--hdt);text-align:left;font-weight:600;padding:8px;font-size:.9rem}
+td{padding:8px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.n,th.n{text-align:right}
+tr.av td{background:var(--warnbg)}
+tr.sn td{font-weight:600}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.x{background:none;color:var(--bad);padding:2px 6px}
+h2{font-size:1.05rem;margin:18px 0 6px}
+.hist{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px}
+.pt{display:none}
+@media print{body{background:#fff;color:#000}.np{display:none!important}.pt{display:block}main{padding:0}.tw,.box{border-color:#999}th{background:#1d2f4f!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}tr.av td{background:#fff3e0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
-<header>
-  <input id="titre" value="Cahier de comptes" aria-label="Titre">
-  <div class="tot">
-    <label>Total remis (FCFA) <input id="total" inputmode="decimal" placeholder="0"></label>
-    <span>Dépensé : <b id="dep">0</b></span>
-    <span>Reste : <b id="reste">0 FCFA</b></span>
-  </div>
-  <div class="cols"><span>Date</span><span>Description</span><span>Montant</span><span>Reste</span></div>
-</header>
-<main id="grid"></main>
-<footer>
-  <button onclick="addRows(10)">+ 10 lignes</button>
-  <button onclick="sauvegarder()">Sauvegarder</button>
-  <button onclick="$('#file').click()">Restaurer</button>
-  <button onclick="nouveau()">Nouveau</button>
-  <button class="p" onclick="pdf()">Exporter en PDF</button>
-  <input type="file" id="file" accept=".json,application/json" hidden>
-</footer>
-<section id="print"></section>
+<main>
+<h1>Cahier de comptes</h1>
+<p class="sub" id="sub"></p>
+<div class="sum" id="sum"></div>
+<div class="np" id="formzone"></div>
+<div id="msg" class="np"></div>
+<div class="tw"><table><thead><tr><th>N°</th><th>Date</th><th>Description</th><th>Type</th><th class="n">Montant (FCFA)</th><th class="n">Reste caisse (FCFA)</th><th class="np"></th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="act np" id="act"></div>
+<div class="np" id="hist"></div>
+</main>
 <script>
-const $=s=>document.querySelector(s), KEY="cahier-comptes", rows=[];
-const num=t=>{t=t.replace(/\s/g,"").replace(",",".");if(!t)return 0;const n=Number(t);return isNaN(n)?null:n};
-const fmt=v=>{const[a,b]=Math.abs(v).toFixed(v%1?2:0).split(".");return(v<0?"-":"")+a.replace(/\B(?=(\d{3})+$)/g," ")+(b?","+b:"")};
-const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const today=()=>new Date().toLocaleDateString("fr-FR");
+const KEY="cahier-comptes-v2";
+const TYPES={remise:"Remise",depense:"Dépense",avance:"Avance (hors caisse)",remboursement:"Remboursement (hors caisse)"};
+let S=load(),view=null;
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.current)return s}catch(e){}return{current:{start:0,carry:0,rows:[]},closed:[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const f=n=>Number(n).toLocaleString("fr-FR");
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const fd=d=>d.split("-").reverse().join("/");
 
-function addRows(k){
-  for(let i=0;i<k;i++){
-    const el=document.createElement("div");el.className="row";
-    const d=document.createElement("input"),n=document.createElement("input"),m=document.createElement("input"),r=document.createElement("div");
-    d.placeholder="jj/mm/aaaa";n.placeholder="Description";m.inputMode="decimal";m.placeholder="0";
-    n.enterKeyHint=m.enterKeyHint="next";
-    m.addEventListener("blur",()=>{const v=num(m.value);if(m.value.trim()&&v!==null){m.value=fmt(v);if(!d.value.trim())d.value=today();calc()}});
-    [d,n,m].forEach(x=>x.addEventListener("input",calc));
-    el.append(d,n,m,r);$("#grid").append(el);rows.push({d,n,m,r});
-  }
+function calc(a,rows){rows=rows||a.rows;let caisse=a.start,remis=0,av=a.carry,err=null;
+ const out=rows.map(r=>{let rest=null;
+  if(r.type==="remise"){caisse+=r.amount;remis+=r.amount;rest=caisse}
+  else if(r.type==="depense"){caisse-=r.amount;rest=caisse;if(caisse<0)err="La caisse deviendrait négative."}
+  else if(r.type==="avance"){av+=r.amount}
+  else{av-=r.amount;if(av<0)err="Le remboursement dépasse les avances."}
+  return{...r,rest}});
+ return{rows:out,caisse,remis,av,err}}
+
+function render(){
+ const closed=view!==null, a=closed?S.closed[view]:S.current, c=calc(a);
+ $("sub").textContent=closed?"Compte clôturé le "+fd(a.closedAt):"Compte en cours — édité le "+fd(today());
+ $("sum").innerHTML=
+  `<div class="box main"><small>${closed?"Solde":"Solde de la caisse"}</small><b>${f(c.caisse)} FCFA</b></div>`+
+  `<div class="box"><small>Total remis</small><b>${f(c.remis)} FCFA</b></div>`+
+  `<div class="box"><small>Avances hors caisse non remboursées</small><b>${f(c.av)} FCFA</b></div>`;
+ let h="";
+ if(a.start>0)h+=`<tr class="sn"><td></td><td></td><td>Solde à nouveau</td><td></td><td class="n">${f(a.start)}</td><td class="n">${f(a.start)}</td><td class="np"></td></tr>`;
+ c.rows.forEach((r,i)=>{const off=r.rest===null;
+  h+=`<tr class="${off?"av":""}"><td>${i+1}</td><td>${fd(r.date)}</td><td>${esc(r.desc)}</td><td>${TYPES[r.type]}</td><td class="n">${f(r.amount)}</td><td class="n">${off?"—":f(r.rest)}</td><td class="np">${closed?"":`<button class="x" title="Supprimer" onclick="del(${i})">✕</button>`}</td></tr>`});
+ if(closed)h+=`<tr class="sn"><td></td><td></td><td>Solde</td><td></td><td></td><td class="n">${f(c.caisse)}</td><td class="np"></td></tr>`;
+ $("rows").innerHTML=h||`<tr><td colspan="7" style="color:var(--mut)">Aucune ligne. Ajoutez une première remise.</td></tr>`;
+ $("formzone").innerHTML=closed?"":`<form onsubmit="add(event)">
+  <div><label for="t">Type</label><select id="t">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+  <div><label for="d">Date</label><input id="d" type="date" value="${today()}" required></div>
+  <div><label for="s">Description</label><input id="s" required></div>
+  <div><label for="m">Montant (FCFA)</label><input id="m" type="number" min="1" step="1" inputmode="numeric" required></div>
+  <div style="align-self:end"><button>Ajouter</button></div></form>`;
+ $("act").innerHTML=closed?`<button class="alt" onclick="view=null;render()">Retour au compte en cours</button><button onclick="window.print()">Exporter en PDF</button>`
+  :`<button onclick="window.print()">Exporter en PDF</button><button class="alt" onclick="closeAcc()">Clôturer le compte</button>`;
+ $("hist").innerHTML=S.closed.length?"<h2>Comptes clôturés</h2>"+S.closed.map((x,i)=>`<div class="hist"><span>Clôturé le ${fd(x.closedAt)} — Solde : ${f(calc(x).caisse)} FCFA</span><button class="alt" onclick="view=${i};render()">Voir</button></div>`).join(""):"";
 }
-function calc(){
-  const t=num($("#total").value);$("#total").classList.toggle("bad",t===null);
-  let reste=t||0,dep=0;
-  for(const r of rows){
-    const m=num(r.m.value);r.m.classList.toggle("bad",m===null);
-    if(m===null||!r.m.value.trim()){r.r.textContent="";continue}
-    dep+=m;reste-=m;r.r.textContent=fmt(reste);r.r.classList.toggle("neg",reste<0);
-  }
-  $("#dep").textContent=fmt(dep);$("#reste").textContent=fmt(reste)+" FCFA";$("#reste").classList.toggle("neg",reste<0);
-  save();
-}
-const data=()=>({titre:$("#titre").value,total:$("#total").value,
-  lignes:rows.map(r=>({d:r.d.value,n:r.n.value,m:r.m.value})).filter(l=>l.d.trim()||l.n.trim()||l.m.trim())});
-function save(){try{localStorage.setItem(KEY,JSON.stringify(data()))}catch(e){}}
-function load(o){
-  $("#grid").innerHTML="";rows.length=0;
-  $("#titre").value=o.titre||"Cahier de comptes";$("#total").value=o.total||"";
-  const L=o.lignes||[];addRows(Math.max(30,L.length+10));
-  L.forEach((l,i)=>{rows[i].d.value=l.d||"";rows[i].n.value=l.n||"";rows[i].m.value=l.m||""});
-  calc();
-}
-function sauvegarder(){
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(data())],{type:"application/json"}));
-  a.download="cahier-"+new Date().toISOString().slice(0,10)+".json";a.click();
-}
-$("#file").addEventListener("change",e=>{
-  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{try{load(JSON.parse(rd.result))}catch(x){alert("Fichier invalide.")}};
-  rd.readAsText(f);e.target.value="";
-});
-function nouveau(){
-  if(confirm("Effacer tout le cahier et recommencer à zéro ?\n(Pense à sauvegarder ou exporter avant.)"))load({});
-}
-function pdf(){
-  const t=num($("#total").value);if(t===null){alert("Le total remis n'est pas valide.");return}
-  const L=data().lignes;if(!L.length){alert("Aucune dépense à exporter.");return}
-  let reste=t,dep=0,h="";
-  for(const[i,l]of L.entries()){
-    const m=num(l.m);if(m===null){alert("Montant invalide : "+l.m);return}
-    dep+=m;reste-=m;
-    h+=`<tr><td>${i+1}</td><td>${esc(l.d)}</td><td>${esc(l.n)}</td><td class="r">${fmt(m)}</td><td class="r">${fmt(reste)}</td></tr>`;
-  }
-  $("#print").innerHTML=`<h1>${esc($("#titre").value)}</h1><p>Édité le ${today()} — Total remis : <b>${fmt(t)} FCFA</b></p>
-  <table><tr><th>N°</th><th>Date</th><th>Description</th><th>Montant (FCFA)</th><th>Reste (FCFA)</th></tr>${h}</table>
-  <p style="text-align:right"><b>Total dépensé : ${fmt(dep)} FCFA<br>Argent restant : ${fmt(t-dep)} FCFA</b></p>`;
-  window.print();
-}
-let saved={};try{saved=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
-load(saved);
-if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
-if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function msg(t,btn){$("msg").innerHTML=t?`<div class="err"><span>${t}</span>${btn||""}</div>`:""}
+function add(e,forceType){
+ if(e)e.preventDefault();
+ const r={type:forceType||$("t").value,date:$("d").value,desc:$("s").value.trim(),amount:Math.round(Number($("m").value))};
+ if(!r.desc||!(r.amount>0))return;
+ const test=calc(S.current,[...S.current.rows,r]);
+ if(test.err){
+  if(r.type==="depense")msg(`Caisse insuffisante : il reste ${f(calc(S.current).caisse)} FCFA. Une dépense ne peut pas dépasser la caisse.`,`<button onclick="add(null,'avance')">Enregistrer en avance</button>`);
+  else msg(test.err);
+  return}
+ msg("");S.current.rows.push(r);save();render()}
+function del(i){
+ const rows=S.current.rows.filter((_,k)=>k!==i);
+ const t=calc(S.current,rows);
+ if(t.err){msg("Suppression impossible : "+t.err.toLowerCase());return}
+ msg("");S.current.rows=rows;save();render()}
+function closeAcc(){
+ const c=calc(S.current);
+ if(!confirm("Clôturer ce compte ? Le solde de "+f(c.caisse)+" FCFA sera reporté comme solde à nouveau."))return;
+ S.closed.push({...S.current,closedAt:today()});
+ S.current={start:c.caisse,carry:c.av,rows:[]};
+ save();msg("");render()}
+render();
 </script>
 </body>
 </html>
