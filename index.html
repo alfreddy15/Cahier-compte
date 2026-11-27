@@ -5,119 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cahier de comptes</title>
 <style>
-:root{--bg:#f3f4f7;--card:#fff;--ink:#17202e;--mut:#5b6678;--line:#d5dae2;--hd:#1d2f4f;--hdt:#fff;--ok:#1d6b4a;--warn:#9a5600;--warnbg:#fff3e0;--bad:#b3261e}
-@media(prefers-color-scheme:dark){:root{--bg:#0f141c;--card:#18202c;--ink:#e8ecf2;--mut:#9aa6b8;--line:#2a3445;--hd:#27426e;--ok:#5fcf9e;--warn:#f0a84a;--warnbg:#2b2112;--bad:#ff8a80}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,sans-serif}
-main{max-width:860px;margin:0 auto;padding:16px}
-h1{font-size:1.4rem;margin:8px 0 2px}
-.sub{color:var(--mut);margin:0 0 14px}
-.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
-.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.box small{color:var(--mut);display:block}
-.box b{font-size:1.25rem;font-variant-numeric:tabular-nums}
-.box.main b{font-size:1.7rem;color:var(--ok)}
-form{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
-label{font-size:.85rem;color:var(--mut);display:block}
-input,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
-button{padding:10px 14px;border:0;border-radius:6px;background:var(--hd);color:var(--hdt);font:inherit;cursor:pointer}
-button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
-#msg{margin-bottom:10px}
-.err{background:var(--warnbg);color:var(--warn);border-radius:6px;padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px}
-table{width:100%;border-collapse:collapse;min-width:560px}
-th{background:var(--hd);color:var(--hdt);text-align:left;font-weight:600;padding:8px;font-size:.9rem}
-td{padding:8px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
-td.n,th.n{text-align:right}
-tr.av td{background:var(--warnbg)}
-tr.sn td{font-weight:600}
-.act{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.x{background:none;color:var(--bad);padding:2px 6px}
-h2{font-size:1.05rem;margin:18px 0 6px}
-.hist{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px}
-.pt{display:none}
-@media print{body{background:#fff;color:#000}.np{display:none!important}.pt{display:block}main{padding:0}.tw,.box{border-color:#999}th{background:#1d2f4f!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}tr.av td{background:#fff3e0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+body{font:16px/1.4 system-ui,sans-serif;margin:0;padding:14px;max-width:760px;margin:auto;color:#17202e;background:#fff}
+h1{font-size:1.3rem;margin:0 0 4px}
+.info{margin:0 0 12px;line-height:1.7}
+input{padding:10px;border:1px solid #bbb;border-radius:6px;font:inherit;width:100%;margin-bottom:8px;box-sizing:border-box}
+.b{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+button{padding:10px 14px;border:0;border-radius:6px;background:#1d2f4f;color:#fff;font:inherit}
+button.g{background:#e6e9ee;color:#17202e}
+#e{color:#b3261e;min-height:1.3em;margin-bottom:6px}
+.t{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th{background:#1d2f4f;color:#fff;padding:7px;text-align:left}
+td{border:1px solid #ccc;padding:7px}
+.n{text-align:right}
+.av td{background:#fff3e0}
+@media print{.np{display:none}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.av td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
-<main>
 <h1>Cahier de comptes</h1>
-<p class="sub" id="sub"></p>
-<div class="sum" id="sum"></div>
-<div class="np" id="formzone"></div>
-<div id="msg" class="np"></div>
-<div class="tw"><table><thead><tr><th>N°</th><th>Date</th><th>Description</th><th>Type</th><th class="n">Montant (FCFA)</th><th class="n">Reste caisse (FCFA)</th><th class="np"></th></tr></thead><tbody id="rows"></tbody></table></div>
-<div class="act np" id="act"></div>
-<div class="np" id="hist"></div>
-</main>
+<p class="info" id="info"></p>
+<div class="np">
+<input id="s" placeholder="Description">
+<input id="m" type="number" inputmode="numeric" placeholder="Montant (FCFA)">
+<div id="e"></div>
+<div class="b">
+<button onclick="add('remis')">+ Argent remis</button>
+<button onclick="add('dep')">− Dépense</button>
+<button class="g" onclick="add('av')">Avance (payé par moi)</button>
+</div>
+</div>
+<div class="t"><table>
+<thead><tr><th>N°</th><th>Date</th><th>Description</th><th class="n">Montant</th><th class="n">Reste</th><th class="np"></th></tr></thead>
+<tbody id="r"></tbody></table></div>
+<div class="b np" style="margin-top:12px">
+<button onclick="window.print()">Exporter en PDF</button>
+<button class="g" onclick="cloture()">Clôturer le compte</button>
+</div>
 <script>
-const KEY="cahier-comptes-v2";
-const TYPES={remise:"Remise",depense:"Dépense",avance:"Avance (hors caisse)",remboursement:"Remboursement (hors caisse)"};
-let S=load(),view=null;
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.current)return s}catch(e){}return{current:{start:0,carry:0,rows:[]},closed:[]}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-const f=n=>Number(n).toLocaleString("fr-FR");
-const $=id=>document.getElementById(id);
-const today=()=>new Date().toISOString().slice(0,10);
-const fd=d=>d.split("-").reverse().join("/");
-
-function calc(a,rows){rows=rows||a.rows;let caisse=a.start,remis=0,av=a.carry,err=null;
- const out=rows.map(r=>{let rest=null;
-  if(r.type==="remise"){caisse+=r.amount;remis+=r.amount;rest=caisse}
-  else if(r.type==="depense"){caisse-=r.amount;rest=caisse;if(caisse<0)err="La caisse deviendrait négative."}
-  else if(r.type==="avance"){av+=r.amount}
-  else{av-=r.amount;if(av<0)err="Le remboursement dépasse les avances."}
-  return{...r,rest}});
- return{rows:out,caisse,remis,av,err}}
-
-function render(){
- const closed=view!==null, a=closed?S.closed[view]:S.current, c=calc(a);
- $("sub").textContent=closed?"Compte clôturé le "+fd(a.closedAt):"Compte en cours — édité le "+fd(today());
- $("sum").innerHTML=
-  `<div class="box main"><small>${closed?"Solde":"Solde de la caisse"}</small><b>${f(c.caisse)} FCFA</b></div>`+
-  `<div class="box"><small>Total remis</small><b>${f(c.remis)} FCFA</b></div>`+
-  `<div class="box"><small>Avances hors caisse non remboursées</small><b>${f(c.av)} FCFA</b></div>`;
- let h="";
- if(a.start>0)h+=`<tr class="sn"><td></td><td></td><td>Solde à nouveau</td><td></td><td class="n">${f(a.start)}</td><td class="n">${f(a.start)}</td><td class="np"></td></tr>`;
- c.rows.forEach((r,i)=>{const off=r.rest===null;
-  h+=`<tr class="${off?"av":""}"><td>${i+1}</td><td>${fd(r.date)}</td><td>${esc(r.desc)}</td><td>${TYPES[r.type]}</td><td class="n">${f(r.amount)}</td><td class="n">${off?"—":f(r.rest)}</td><td class="np">${closed?"":`<button class="x" title="Supprimer" onclick="del(${i})">✕</button>`}</td></tr>`});
- if(closed)h+=`<tr class="sn"><td></td><td></td><td>Solde</td><td></td><td></td><td class="n">${f(c.caisse)}</td><td class="np"></td></tr>`;
- $("rows").innerHTML=h||`<tr><td colspan="7" style="color:var(--mut)">Aucune ligne. Ajoutez une première remise.</td></tr>`;
- $("formzone").innerHTML=closed?"":`<form onsubmit="add(event)">
-  <div><label for="t">Type</label><select id="t">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
-  <div><label for="d">Date</label><input id="d" type="date" value="${today()}" required></div>
-  <div><label for="s">Description</label><input id="s" required></div>
-  <div><label for="m">Montant (FCFA)</label><input id="m" type="number" min="1" step="1" inputmode="numeric" required></div>
-  <div style="align-self:end"><button>Ajouter</button></div></form>`;
- $("act").innerHTML=closed?`<button class="alt" onclick="view=null;render()">Retour au compte en cours</button><button onclick="window.print()">Exporter en PDF</button>`
-  :`<button onclick="window.print()">Exporter en PDF</button><button class="alt" onclick="closeAcc()">Clôturer le compte</button>`;
- $("hist").innerHTML=S.closed.length?"<h2>Comptes clôturés</h2>"+S.closed.map((x,i)=>`<div class="hist"><span>Clôturé le ${fd(x.closedAt)} — Solde : ${f(calc(x).caisse)} FCFA</span><button class="alt" onclick="view=${i};render()">Voir</button></div>`).join(""):"";
-}
-function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function msg(t,btn){$("msg").innerHTML=t?`<div class="err"><span>${t}</span>${btn||""}</div>`:""}
-function add(e,forceType){
- if(e)e.preventDefault();
- const r={type:forceType||$("t").value,date:$("d").value,desc:$("s").value.trim(),amount:Math.round(Number($("m").value))};
- if(!r.desc||!(r.amount>0))return;
- const test=calc(S.current,[...S.current.rows,r]);
- if(test.err){
-  if(r.type==="depense")msg(`Caisse insuffisante : il reste ${f(calc(S.current).caisse)} FCFA. Une dépense ne peut pas dépasser la caisse.`,`<button onclick="add(null,'avance')">Enregistrer en avance</button>`);
-  else msg(test.err);
-  return}
- msg("");S.current.rows.push(r);save();render()}
-function del(i){
- const rows=S.current.rows.filter((_,k)=>k!==i);
- const t=calc(S.current,rows);
- if(t.err){msg("Suppression impossible : "+t.err.toLowerCase());return}
- msg("");S.current.rows=rows;save();render()}
-function closeAcc(){
- const c=calc(S.current);
- if(!confirm("Clôturer ce compte ? Le solde de "+f(c.caisse)+" FCFA sera reporté comme solde à nouveau."))return;
- S.closed.push({...S.current,closedAt:today()});
- S.current={start:c.caisse,carry:c.av,rows:[]};
- save();msg("");render()}
-render();
+var K="cahier-simple",D;
+try{D=JSON.parse(localStorage.getItem(K))}catch(x){}
+if(!D)D={start:0,rows:[]};
+function save(){try{localStorage.setItem(K,JSON.stringify(D))}catch(x){}}
+function f(n){return Number(n).toLocaleString("fr-FR")}
+function calc(rows){var c=D.start,remis=0,av=0,bad=false,out=[];
+ rows.forEach(function(r){var rest=null;
+  if(r.t=="remis"){c+=r.m;remis+=r.m;rest=c}
+  else if(r.t=="dep"){c-=r.m;rest=c;if(c<0)bad=true}
+  else av+=r.m;
+  out.push({r:r,rest:rest})});
+ return{c:c,remis:remis,av:av,bad:bad,out:out}}
+function show(){var x=calc(D.rows),h="";
+ document.getElementById("info").innerHTML="Édité le "+new Date().toLocaleDateString("fr-FR")+" — Total remis : <b>"+f(x.remis)+" FCFA</b><br>Solde : <b>"+f(x.c)+" FCFA</b>"+(x.av?"<br>Avances hors caisse : "+f(x.av)+" FCFA":"");
+ if(D.start>0)h+="<tr><td></td><td></td><td>Solde à nouveau</td><td class='n'>"+f(D.start)+"</td><td class='n'>"+f(D.start)+"</td><td class='np'></td></tr>";
+ x.out.forEach(function(o,i){var r=o.r;
+  h+="<tr class='"+(r.t=="av"?"av":"")+"'><td>"+(i+1)+"</td><td>"+r.d+"</td><td></td><td class='n'>"+f(r.m)+"</td><td class='n'>"+(o.rest===null?"—":f(o.rest))+"</td><td class='np'><button class='g' onclick='del("+i+")'>✕</button></td></tr>"});
+ var tb=document.getElementById("r");tb.innerHTML=h;
+ var tds=tb.querySelectorAll("tr");var k=D.start>0?1:0;
+ D.rows.forEach(function(r,i){tds[i+k].children[2].textContent=r.s+(r.t=="av"?" (avance)":"")})}
+function add(t){var s=document.getElementById("s").value.trim(),m=Math.round(Number(document.getElementById("m").value)),e=document.getElementById("e");
+ e.textContent="";
+ if(!s||!(m>0)){e.textContent="Remplis la description et le montant.";return}
+ var row={t:t,s:s,m:m,d:new Date().toLocaleDateString("fr-FR")};
+ if(calc(D.rows.concat([row])).bad){e.textContent="Caisse insuffisante : il reste "+f(calc(D.rows).c)+" FCFA. Utilise « Avance » si tu paies toi-même.";return}
+ D.rows.push(row);save();document.getElementById("s").value="";document.getElementById("m").value="";show()}
+function del(i){var rows=D.rows.filter(function(_,k){return k!=i});
+ if(calc(rows).bad){document.getElementById("e").textContent="Suppression impossible : la caisse serait négative.";return}
+ D.rows=rows;save();show()}
+function cloture(){var c=calc(D.rows).c;
+ if(!confirm("Clôturer ? Exporte d'abord le PDF. Le solde de "+f(c)+" FCFA deviendra le solde à nouveau."))return;
+ D={start:c,rows:[]};save();show()}
+show();
 </script>
 </body>
 </html>
