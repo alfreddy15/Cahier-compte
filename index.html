@@ -41,6 +41,10 @@ td{border:1px solid #ccc;padding:7px}
 <div class="b np" style="margin-top:12px">
 <button onclick="window.print()">Exporter en PDF</button>
 <button class="g" onclick="cloture()">Clôturer le compte</button>
+<button class="g" onclick="nouveau()">Nouveau</button>
+<button class="g" onclick="sauvegarder()">Sauvegarder</button>
+<button class="g" onclick="document.getElementById('fi').click()">Restaurer</button>
+<input type="file" id="fi" accept=".json,application/json" style="display:none" onchange="restaurer(this)">
 </div>
 <script>
 var K="cahier-simple",D;
@@ -75,6 +79,26 @@ function del(i){var rows=D.rows.filter(function(_,k){return k!=i});
 function cloture(){var c=calc(D.rows).c;
  if(!confirm("Clôturer ? Exporte d'abord le PDF. Le solde de "+f(c)+" FCFA deviendra le solde à nouveau."))return;
  D={start:c,rows:[]};save();show()}
+function nouveau(){
+ if(!confirm("Nouveau cahier vide, sans solde à nouveau ? Pense à sauvegarder avant."))return;
+ D={start:0,rows:[]};save();show()}
+function sauvegarder(){
+ var a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:"application/json"}));
+ a.download="cahier-de-comptes-"+new Date().toISOString().slice(0,10)+".json";
+ document.body.appendChild(a);a.click();a.remove()}
+function restaurer(inp){
+ var file=inp.files[0],e=document.getElementById("e");
+ if(!file)return;
+ var rd=new FileReader();
+ rd.onload=function(){
+  try{var x=JSON.parse(rd.result);
+   if(typeof x.start!="number"||!Array.isArray(x.rows))throw 0;
+   if(!confirm("Remplacer le cahier actuel par cette sauvegarde ?")){inp.value="";return}
+   D=x;save();e.textContent="";show()}
+  catch(err){e.textContent="Fichier de sauvegarde invalide."}
+  inp.value=""};
+ rd.readAsText(file)}
 show();
 </script>
 </body>
